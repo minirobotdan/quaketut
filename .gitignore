@@ -31,3 +31,8 @@
 # Debug files
 *.dSYM/
 *.su
+/QuakeTut/QuakeTut.VC.VC.opendb
+/QuakeTut/QuakeTut.VC.db
+/QuakeTut/Debug
+/QuakeTut/.vs/QuakeTut/v14
+/QuakeTut/QuakeTut/Debug
