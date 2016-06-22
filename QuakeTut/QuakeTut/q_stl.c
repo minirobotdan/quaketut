@@ -3,7 +3,7 @@
 /**
 	String copy
 */
-void Q_strcpy(uint8 *dest, uint8 *src) {
+void Q_strcpy(char *dest, const char *src) {
 	while (*src) {
 		*dest++ = *src++;
 	}
@@ -13,7 +13,7 @@ void Q_strcpy(uint8 *dest, uint8 *src) {
 /**
 	Copy specific number of bytes
 */
-void Q_strncpy(uint8 *dest, uint8 *src, uint8 count) {
+void Q_strncpy(char *dest, const char *src, char count) {
 
 	if (count < 0) return;
 
@@ -28,7 +28,7 @@ void Q_strncpy(uint8 *dest, uint8 *src, uint8 count) {
 	}
 }
 
-int32 Q_strlen(uint8 *str) {
+int32 Q_strlen(const char *str) {
 	int32 count = 0;
 
 	while (str[count]) {
@@ -40,7 +40,7 @@ int32 Q_strlen(uint8 *str) {
 /**
 	String comparison
 */
-int32 Q_strcmp(uint8 *s1, uint8 *s2) {
+int32 Q_strcmp(const char *s1, const char *s2) {
 
 	while (*s1 == *s2) {
 
@@ -59,7 +59,7 @@ int32 Q_strcmp(uint8 *s1, uint8 *s2) {
 int32 Q_atoi(const char *str) {
 	int32 sign = 1;
 	int32 val = 0;
-	uint8 c;
+	char c;
 
 	if (*str == '-') {
 		sign = -1;
