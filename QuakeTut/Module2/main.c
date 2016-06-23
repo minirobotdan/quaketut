@@ -1,10 +1,11 @@
+#include <stdio.h>
 #include <Windows.h>
 
 BOOL IsRunning = TRUE;
 
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
-	LRESULT Result;
+	LRESULT Result = 0;
 
 	switch (uMsg) {
 	case WM_KEYUP:
@@ -14,7 +15,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_ACTIVATE:
 	case WM_CREATE:
 	case WM_DESTROY:
-		IsRunning = FALSE;
 		break;
 	default:
 		Result = DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -48,7 +48,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	mainwindow = CreateWindowEx(
 		0,
 		"Module 2",
-		"Lesson 2.1",
+		"Lesson 2.3",
 		WindowStyle,
 		200,
 		200,
@@ -66,6 +66,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	PatBlt(DeviceContext, 0, 0, 800, 600, BLACKNESS);
 	ReleaseDC(mainwindow, DeviceContext);
 
+	LARGE_INTEGER Frequency;
+	QueryPerformanceFrequency(&Frequency);
+
+	double SecondsPerTick = 1.0 / (double)Frequency.QuadPart;
+
+	LARGE_INTEGER Tick, Tock;
+	QueryPerformanceCounter(&Tick);
+
 	MSG msg;
 	LRESULT Result;
 
@@ -77,7 +85,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		// Update game
 		// Draw
-		
+		QueryPerformanceCounter(&Tock);
+
+		__int64 Interval = Tock.QuadPart - Tick.QuadPart;
+		double SecondsGoneBy = (double)Interval * SecondsPerTick;
+
+		char buf[64];
+
+		sprintf_s(buf, 64, "Total time: %3.7f \n", SecondsGoneBy);
+		OutputDebugString(buf);
+
+		QueryPerformanceCounter(&Tick);
 	}
 
 	return 0;
