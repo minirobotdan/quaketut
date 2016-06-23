@@ -1,7 +1,26 @@
 #include <Windows.h>
 
+BOOL IsRunning = TRUE;
+
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+
+	LRESULT Result;
+
+	switch (uMsg) {
+	case WM_KEYUP:
+		IsRunning = FALSE;
+		Result = 56;
+		break;
+	case WM_ACTIVATE:
+	case WM_CREATE:
+	case WM_DESTROY:
+		IsRunning = FALSE;
+		break;
+	default:
+		Result = DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+
+	return Result;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
@@ -46,6 +65,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HDC DeviceContext = GetDC(mainwindow);
 	PatBlt(DeviceContext, 0, 0, 800, 600, BLACKNESS);
 	ReleaseDC(mainwindow, DeviceContext);
+
+	MSG msg;
+	LRESULT Result;
+
+	while (IsRunning) {
+		// Check in with OS
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			Result = DispatchMessage(&msg);
+		}
+		// Update game
+		// Draw
+		
+	}
 
 	return 0;
 }
