@@ -1,20 +1,60 @@
 #include <stdio.h>
 #include <Windows.h>
 
-BOOL IsRunning = TRUE;
+static BOOL IsRunning = TRUE;
 
+static double GTimePassed = 0;
+static double SecondsPerTick = 0;
+static __int64 GTimeCount = 0;
+
+// Timer Code
+float Sys_InitFloatTime(void) {
+	LARGE_INTEGER Frequency;
+	QueryPerformanceFrequency(&Frequency);
+
+	SecondsPerTick = 1.0 / (double)Frequency.QuadPart;
+
+	LARGE_INTEGER Counter;
+	QueryPerformanceCounter(&Counter);
+
+	GTimeCount = Counter.QuadPart;
+
+	return 0;
+}
+
+float Sys_FloatTime(void) {
+
+	LARGE_INTEGER Counter;
+	QueryPerformanceCounter(&Counter);
+
+	__int64 Interval = Counter.QuadPart - GTimeCount;
+	GTimeCount = Counter.QuadPart;
+
+	double SecondsGoneBy = (double)Interval * SecondsPerTick;
+
+	GTimePassed += SecondsGoneBy;
+
+	return (float)GTimePassed;
+}
+
+// Shutdown Application procedure
+void Sys_Shutdown(void) {
+	IsRunning = FALSE;
+}
+
+// Handle windows events
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	LRESULT Result = 0;
 
 	switch (uMsg) {
-	case WM_KEYUP:
-		IsRunning = FALSE;
-		Result = 56;
-		break;
 	case WM_ACTIVATE:
+		break;
 	case WM_CREATE:
+		break;
 	case WM_DESTROY:
+		Sys_Shutdown();
+		PostQuitMessage(0);
 		break;
 	default:
 		Result = DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -23,6 +63,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return Result;
 }
 
+// Main
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
 
 	WNDCLASS wc = { 0 };
@@ -48,10 +89,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	mainwindow = CreateWindowEx(
 		0,
 		"Module 2",
-		"Lesson 2.3",
+		"Lesson 2.4",
 		WindowStyle,
-		200,
-		200,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
 		r.right - r.left,
 		r.bottom - r.top,
 		NULL,
@@ -66,36 +107,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	PatBlt(DeviceContext, 0, 0, 800, 600, BLACKNESS);
 	ReleaseDC(mainwindow, DeviceContext);
 
-	LARGE_INTEGER Frequency;
-	QueryPerformanceFrequency(&Frequency);
-
-	double SecondsPerTick = 1.0 / (double)Frequency.QuadPart;
-
-	LARGE_INTEGER Tick, Tock;
-	QueryPerformanceCounter(&Tick);
+	float timecount = Sys_InitFloatTime();
 
 	MSG msg;
-	LRESULT Result;
 
 	while (IsRunning) {
 		// Check in with OS
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
-			Result = DispatchMessage(&msg);
+			DispatchMessage(&msg);
 		}
-		// Update game
-		// Draw
-		QueryPerformanceCounter(&Tock);
 
-		__int64 Interval = Tock.QuadPart - Tick.QuadPart;
-		double SecondsGoneBy = (double)Interval * SecondsPerTick;
+		float newtime = Sys_FloatTime();
 
 		char buf[64];
 
-		sprintf_s(buf, 64, "Total time: %3.7f \n", SecondsGoneBy);
+		sprintf_s(buf, 64, "Total time: %3.7f \n", newtime);
 		OutputDebugString(buf);
 
-		QueryPerformanceCounter(&Tick);
 	}
 
 	return 0;
